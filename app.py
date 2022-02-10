@@ -28,7 +28,7 @@ def render_sidebar(connection: sqlite3.Connection) -> None:
         "Delete a Note": render_delete,
         "About": render_about,
     }
-    choice = st.sidebar.selectbox("Menu", views.keys())
+    choice = st.sidebar.radio("Go To Page:", views.keys())
     render_func = views.get(choice)
     render_func(connection)
 
@@ -69,13 +69,16 @@ def create_notes_table(connection: sqlite3.Connection) -> None:
 def seed_notes_table(connection: sqlite3.Connection) -> None:
     """Insert a sample Note row into the database"""
     st.warning("Seeding Notes Table")
-    new_note = BaseNote(
+    seed_note = Note(
+        rowid=1,
         created_timestamp=1644470272,
         updated_timestamp=utc_timestamp(),
         username="SYSTEM",
         body="Auto Generated Note!!! :tada:",
     )
-    NoteService.create_note(connection, new_note)
+    seed_note_query = f"""REPLACE into notes(rowid, created_timestamp, updated_timestamp, username, body)
+    VALUES(:rowid, :created_timestamp, :updated_timestamp, :username, :body);"""
+    execute_query(connection, seed_note_query, asdict(seed_note))
 
 
 def execute_query(
@@ -161,14 +164,16 @@ def render_note(note: Note) -> None:
 
 def do_create(connection: sqlite3.Connection, note: BaseNote) -> None:
     """Streamlit callback for creating a note and showing confirmation"""
-    st.warning("Creating a Note")
+    st.warning("Creating your Note")
     NoteService.create_note(connection, note)
-    st.success("Created a Note")
+    st.success(
+        f"Successfully Created your Note! Check the Read Note Feed page to see it"
+    )
 
 
 def render_create(connection: sqlite3.Connection) -> None:
     """Show the form for creating a new Note"""
-    with st.form("create_form"):
+    with st.form("create_form", clear_on_submit=False):
         st.write("Enter a Username and Note")
         username = st.text_input(
             "Username",
@@ -184,7 +189,9 @@ def render_create(connection: sqlite3.Connection) -> None:
         )
 
         new_note = BaseNote(utc_timestamp(), utc_timestamp(), username, note)
-        submitted = st.form_submit_button("Submit", help="Create your Note!")
+        submitted = st.form_submit_button(
+            "Submit", help="Create your Note! (You'll get a confirmation below)"
+        )
         if submitted:
             do_create(connection, new_note)
 
@@ -203,21 +210,21 @@ def render_read(connection: sqlite3.Connection) -> None:
 
 def do_update(connection: sqlite3.Connection, new_note: Note) -> None:
     """Streamlit callback for updating a note and showing confirmation"""
-    st.warning(f"Updating Note #{new_note.rowid} {new_note}")
+    st.warning(f"Updating Note #{new_note.rowid}")
     NoteService.update_note(connection, new_note)
-    st.success(f"Updated Note #{new_note.rowid} {new_note}")
+    st.success(f"Updated Note #{new_note.rowid}, go to the Read Notes Feed to see it!")
 
 
 def render_update(connection: sqlite3.Connection) -> None:
     """Show the form for updating an existing Note"""
     st.success("Reading Notes")
     note_rows = NoteService.list_all_notes(connection)
-    notes = [Note(**row) for row in note_rows]
-    note_map = {
-        f"{note.rowid} - by {note.username} on {display_timestamp(note.created_timestamp)}": note
-        for note in notes
-    }
-    note_id = st.selectbox("Which Note to Update?", note_map.keys())
+    note_map = {row["rowid"]: Note(**row) for row in note_rows}
+    note_id = st.selectbox(
+        "Which Note to Update?",
+        note_map.keys(),
+        format_func=lambda x: f"{note_map[x].rowid} - by {note_map[x].username} on {display_timestamp(note_map[x].created_timestamp)}",
+    )
     note_to_update = note_map[note_id]
     with st.form("update_form"):
         st.write("Update Username and/or Note")
@@ -234,7 +241,9 @@ def render_update(connection: sqlite3.Connection) -> None:
             help="Enter your note (valid html-safe Markdown)",
         )
 
-        st.caption(f"Note #{note_id}")
+        st.caption(
+            f"Note #{note_id} - by {note_to_update.username} on {display_timestamp(note_to_update.created_timestamp)}"
+        )
 
         submitted = st.form_submit_button(
             "Submit",
