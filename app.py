@@ -223,13 +223,13 @@ def render_update(connection: sqlite3.Connection) -> None:
         st.write("Update Username and/or Note")
         username = st.text_input(
             "Username",
-            value=note_to_update.body,
+            value=note_to_update.username,
             max_chars=CHAR_LIMIT,
             help="Enter a Username to display by your note",
         )
         body = st.text_input(
             "Note",
-            value=note_to_update.username,
+            value=note_to_update.body,
             max_chars=CHAR_LIMIT,
             help="Enter your note (valid html-safe Markdown)",
         )
