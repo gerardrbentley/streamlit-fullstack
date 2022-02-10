@@ -152,6 +152,6 @@ This started as the Littlest Fullstack App with just Streamlit + SQLite.
 
 Next steps were upgrading the data store to Postgres :elephant:.
 
-Then a backend API layer with FastAPI :lightning:.
+Then an NGINX webserver + Docker containerization layer to serve it all up!
 
-And finally a webserver and containerization layer to serve it all up!""")
+Finally a backend API layer with FastAPI :lightning:!""")
