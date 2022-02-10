@@ -69,15 +69,13 @@ def create_notes_table(connection: sqlite3.Connection) -> None:
 def seed_notes_table(connection: sqlite3.Connection) -> None:
     """Insert a sample Note row into the database"""
     st.warning("Seeding Notes Table")
-    new_note = Note(
-        rowid=1,
+    new_note = BaseNote(
         created_timestamp=1644470272,
         updated_timestamp=utc_timestamp(),
         username="SYSTEM",
         body="Auto Generated Note!!! :tada:",
     )
-    st.warning(f"Updating Note #{new_note.rowid}")
-    NoteService.update_note(connection, new_note)
+    NoteService.create_note(connection, new_note)
 
 
 def execute_query(
