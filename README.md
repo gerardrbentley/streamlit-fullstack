@@ -1,5 +1,7 @@
 # Streamlit Full Stack App
 
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/gerardrbentley/streamlit-fullstack/app.py)
+
 Demo Repo on building a Full Stack CRUD App with Streamlit.
 
 Create, Read, Update, and Delete from a feed of 140 character markdown notes
@@ -141,7 +143,7 @@ For more on the forms for Creating, Updating and Deleting, check out the source 
 ### Gluing It All Together
 
 - SQLite can run with the Python process, so we're good to deploy it wherever the Streamlit app runs
-- Frontend and Backend are in one server, so there's no JSON or RPC data going across the wire
+- Frontend and Backend are in one server, so there's no JSON or RPC data going between App services
 
 Python `dataclasses.dataclass` provides a nice way of modeling simple entities like this Note example.
 It lacks all of the features of `pydantic` and `attrs`, but it does have a free `__init__` with kwargs and the `dataclasses.asdict` method.
