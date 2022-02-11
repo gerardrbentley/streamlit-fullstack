@@ -4,7 +4,10 @@
 
 Demo Repo on building a Full Stack CRUD App with Streamlit.
 
-Create, Read, Update, and Delete from a feed of 140 character markdown notes
+Create, Read, Update, and Delete from a feed of 140 character markdown notes.
+
+- :mouse: littlest (original) version wil remain on [branch `littlest`](https://github.com/gerardrbentley/streamlit-fullstack/tree/littlest)
+- :elephant: Postgres (`psycopg3`) + Nginx + Docker-Compose version at [branch `psycopg`](https://github.com/gerardrbentley/streamlit-fullstack/tree/psycopg) and Live at [streamlit-postgres.gerardbentley.com](https://streamlit-postgres.gerardbentley.com)
 
 ## The Littlest Full Stack App
 
