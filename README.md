@@ -6,6 +6,16 @@ Demo Repo on building a Full Stack CRUD App with Streamlit.
 
 Create, Read, Update, and Delete from a feed of 140 character markdown notes.
 
+Ran with `python 3.9.7`, `streamlit 1.4 & 1.5`:
+
+```sh
+wget https://raw.githubusercontent.com/gerardrbentley/streamlit-fullstack/littlest/app.py
+pip install streamlit
+streamlit run app.py
+```
+
+(Don't have Python / `pip` installed? [here's my way](https://tech.gerardbentley.com/python/beginner/2022/01/29/install-python.html))
+
 - :mouse: littlest (original) version wil remain on [branch `littlest`](https://github.com/gerardrbentley/streamlit-fullstack/tree/littlest)
 - :elephant: Postgres (`psycopg3`) + Nginx + Docker-Compose version at [branch `psycopg`](https://github.com/gerardrbentley/streamlit-fullstack/tree/psycopg) and Live at [streamlit-postgres.gerardbentley.com](https://streamlit-postgres.gerardbentley.com)
 
