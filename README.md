@@ -2,6 +2,8 @@
 
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/gerardrbentley/streamlit-fullstack/app.py)
 
+- Postgres Version Live at [streamlit-postgres.gerardbentley.com](https://streamlit-postgres.gerardbentley.com)
+
 Demo Repo on building a Full Stack CRUD App with Streamlit.
 
 Create, Read, Update, and Delete from a feed of 140 character markdown notes.
@@ -10,6 +12,26 @@ Ran with `python 3.9.7`, `streamlit 1.4 & 1.5`:
 
 ```sh
 wget https://raw.githubusercontent.com/gerardrbentley/streamlit-fullstack/littlest/app.py
+pip install streamlit
+streamlit run app.py
+```
+
+(Don't have Python / `pip` installed? [here's my way](https://tech.gerardbentley.com/python/beginner/2022/01/29/install-python.html))
+
+- :mouse: littlest (original) version wil remain on [branch `littlest`](https://github.com/gerardrbentley/streamlit-fullstack/tree/littlest)
+- :elephant: Postgres (`psycopg3`) + Nginx + Docker-Compose version at [branch `psycopg`](https://github.com/gerardrbentley/streamlit-fullstack/tree/psycopg) and Live at [streamlit-postgres.gerardbentley.com](https://streamlit-postgres.gerardbentley.com)
+
+Ran with `Docker version 20.10.12`, `Docker Compose version v2.2.3`:
+
+```sh
+wget https://github.com/gerardrbentley/streamlit-fullstack/archive/refs/heads/psycopg.zip
+unzip psycopg.zip
+cd streamlit-fullstack-psycopg
+mv example.env .env.dev
+# Production: Fill out .env with real credentials
+mv streamlit_app/.streamlit/config.example.toml streamlit_app/.streamlit/config.toml
+# Production: random cookie secret
+# python -c "from pathlib import Path; from string import ascii_lowercase, digits; from random import choice; Path('streamlit_app/.streamlit/config.toml').write_text(Path('streamlit_app/.streamlit/config.example.toml').read_text().replace('changemecookiesecret', ''.join([choice(ascii_lowercase + digits) for _ in range(64)])))"
 pip install streamlit
 streamlit run app.py
 ```
@@ -40,6 +62,60 @@ For the first swing at this I also took the standard CRUD definition of Full-Sta
 
 ### Data Store
 
+#### Postgres
+
+The Postgres server in dev and when used in docker-compose stack is dockerized.
+
+It spins up as a service that supports the streamlit app.
+The Streamlit startup sequence naively createst the notes table if it doesn't exist, and trys to seed a row.
+(This action is also cached by Streamlit, so itsn't terrible, but definitely not [12 factor app](https://12factor.net/admin-processes) standard for admin process)
+
+This version uses synchronous `psycopg` v3 to read and write similarly to the SQLite statements, with the bonus of reading rows directly from the database into our `dataclass` Note model.
+
+A `pydantic.BaseSettings` object grabs the postgres connection variables from environment, which are provided by docker-compose (*note* EXPORT env variables if you have your own postgres server) 
+
+```python
+
+class PsycopgSettings(BaseSettings):
+    """\
+host:
+    Name of host to connect to. If this begins with a slash, it specifies Unix-domain communication rather than TCP/IP communication; the value is the name of the directory in which the socket file is stored. The default behavior when host is not specified is to connect to a Unix-domain socket in /tmp (or whatever socket directory was specified when PostgreSQL was built). On machines without Unix-domain sockets, the default is to connect to localhost.
+
+port:
+    Port number to connect to at the server host, or socket file name extension for Unix-domain connections.
+
+dbname:
+    The database name. Defaults to be the same as the user name.
+
+user:
+    PostgreSQL user name to connect as. Defaults to be the same as the operating system name of the user running the application.
+
+password:
+    Password to be used if the server demands password authentication.
+"""
+
+    postgres_host: str
+    postgres_port: int = 5432
+    postgres_db: str
+    postgres_user: str
+    postgres_password: str
+
+    def get_connection_string(self) -> str:
+        return f"dbname={self.postgres_db} host={self.postgres_host} user={self.postgres_user} password={self.postgres_password}"
+
+    def get_connection_args(self) -> dict:
+        return {
+            "host": self.postgres_host,
+            "port": self.postgres_port,
+            "dbname": self.postgres_db,
+            "user": self.postgres_user,
+            "password": self.postgres_password,
+        }
+```
+
+
+#### SQLite (littlest version)
+
 Using SQLite is straightforward if you understand how to set up and query other SQL flavors.
 
 I say this because we don't need to download or spin up any external database server, its a C library that will let us interact with a database with just two lines of python!
@@ -60,6 +136,54 @@ connection = sqlite3.connect('notes.db', check_same_thread=False)
 ```
 
 ### Backend
+
+#### Psycopg
+
+Version 3 of `psycopg` has some static typing benefits built in.
+Here we had a function that executes a query then returns all the matching / fetched rows.
+
+The nice thing is if we pass a dataclass type as the `dclass` arg we'll get out a list of that type!
+
+We also have to fix the execute query function that doesn't return any rows, as psycopg will raise an Exception.
+
+```python
+def fetch_rows(
+    connection: psycopg.Connection,
+    query: str,
+    args: Optional[dict] = None,
+    dclass: Optional[Type] = None,
+) -> list:
+    """Given psycopg.Connection and a string query (and optionally necessary query args as a dict),
+    Attempt to execute query with cursor, commit transaction, and return fetched rows"""
+    if dclass is not None:
+        cur = connection.cursor(row_factory=class_row(dclass))
+    else:
+        cur = connection.cursor()
+    if args is not None:
+        cur.execute(query, args)
+    else:
+        cur.execute(query)
+    results = cur.fetchall()
+    cur.close()
+    return results
+
+
+def execute_query(
+    connection: psycopg.Connection,
+    query: str,
+    args: Optional[dict] = None,
+) -> None:
+    """Given psycopg.Connection and a string query (and optionally necessary query args as a dict),
+    Attempt to execute query with cursor"""
+    cur = connection.cursor()
+    if args is not None:
+        cur.execute(query, args)
+    else:
+        cur.execute(query)
+    cur.close()
+```
+
+#### SQLite
 
 This is all in one file, but the idea of a "Service" that provides access to the data store and returns rows from the data store can be captured in a class as a namespace:
 
@@ -95,13 +219,49 @@ class NoteService:
 
 ### Frontend
 
+#### Updated
+
+The main `app.py` entrypoint now contains less code, having been split into `db.py`, `data.py`, `views.py`, and `formatting.py`.
+
+It now focuses on the setup, connecting to the database, and rendering the selected page view
+
+```python
+import src.views as views
+from src.db import PsycopgSettings, create_notes_table, seed_notes_table
+
+PAGES = {
+    "Read Note Feed": views.render_read,  # Read first for display default
+    "Create a Note": views.render_create,
+    "Update a Note": views.render_update,
+    "Delete a Note": views.render_delete,
+    "About": views.render_about,
+}
+
+def main() -> None:
+    """Main Streamlit App Entry"""
+    connection_args = PsycopgSettings().get_connection_args()
+    connection = get_connection(**connection_args)
+    init_db(connection)
+
+    st.header(f"The Littlest Fullstack App + Postgres :elephant:!")
+    render_sidebar(connection)
+
+
+def render_sidebar(connection: psycopg.Connection) -> None:
+    """Provides Selectbox Drop Down for which view to render"""
+    choice = st.sidebar.radio("Go To Page:", PAGES.keys())
+    render_func = PAGES.get(choice)
+    render_func(connection)
+```
+
+#### Littlest
+
 I chose to use a Selectbox in the Sidebar to act as page navigation.
 This organizes things similarly to other Streamlit multi page examples.
 
 The main entrypoint looks like this:
 
 ```python
-
 def main() -> None:
     """Main Streamlit App Entry"""
     connection = get_connection(DATABASE_URI)

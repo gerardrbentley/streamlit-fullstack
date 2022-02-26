@@ -1,0 +1,4 @@
+psycopg==3.0.8
+psycopg-binary==3.0.8
+pydantic==1.9.0
+streamlit==1.5.1
