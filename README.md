@@ -29,9 +29,9 @@ Ran with `Docker version 20.10.12`, `Docker Compose version v2.2.3`:
 curl https://github.com/gerardrbentley/streamlit-fullstack/archive/refs/heads/psycopg.zip -O -L
 unzip psycopg
 cd streamlit-fullstack-psycopg
-mv example.env .env.dev
-# Production: Fill out .env with real credentials
-mv streamlit_app/.streamlit/config.example.toml streamlit_app/.streamlit/config.toml
+cp example.env .env.dev
+# Production: Fill out .env with real credentials, docker compose should shut off streamlit ports
+cp streamlit_app/.streamlit/config.example.toml streamlit_app/.streamlit/config.toml
 # Production: random cookie secret
 # python -c "from pathlib import Path; from string import ascii_lowercase, digits; from random import choice; Path('streamlit_app/.streamlit/config.toml').write_text(Path('streamlit_app/.streamlit/config.example.toml').read_text().replace('changemecookiesecret', ''.join([choice(ascii_lowercase + digits) for _ in range(64)])))"
 docker-compose up
