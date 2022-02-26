@@ -1,3 +1,4 @@
+from time import time
 import psycopg
 import os
 
@@ -17,7 +18,17 @@ PAGES = {
 def main() -> None:
     """Main Streamlit App Entry"""
     connection_args = PsycopgSettings().get_connection_args()
-    connection = get_connection(**connection_args)
+    max_retries = 5
+    with st.spinner("Get Connection"):
+        for retry_num in range(max_retries):
+            try:
+                connection = get_connection(**connection_args)
+                break
+            except psycopg.OperationalError as e:
+                time.sleep(2 * retry_num + 2)
+            except Exception as e:
+                raise e
+
     init_db(connection)
 
     st.header(f"The Littlest Fullstack App + Postgres :elephant:!")
@@ -39,7 +50,6 @@ def get_connection(**kwargs) -> psycopg.Connection:
     Postgres connection args:
     - https://www.postgresql.org/docs/9.1/libpq-connect.html
     """
-    st.error("Get Connection")
     connection = psycopg.connect(**kwargs, autocommit=True)
     return connection
 

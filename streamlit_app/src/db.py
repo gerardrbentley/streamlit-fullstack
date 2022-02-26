@@ -79,6 +79,9 @@ def seed_notes_table(connection: psycopg.Connection) -> None:
     VALUES(%(rowid)s, %(created_timestamp)s, %(updated_timestamp)s, %(username)s, %(body)s)
     ON CONFLICT DO NOTHING;"""
     execute_query(connection, seed_note_query, asdict(seed_note))
+    # Reset autoincrement
+    reset_seq_query = """SELECT setval('notes_rowid_seq', (SELECT MAX(rowid) from "notes"));"""
+    execute_query(connection, reset_seq_query)
 
 
 def fetch_rows(
