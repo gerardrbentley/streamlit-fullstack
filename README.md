@@ -21,6 +21,29 @@ streamlit run app.py
 - :mouse: littlest (original) version wil remain on [branch `littlest`](https://github.com/gerardrbentley/streamlit-fullstack/tree/littlest)
 - :elephant: Postgres (`psycopg3`) + Nginx + Docker-Compose version at [branch `psycopg`](https://github.com/gerardrbentley/streamlit-fullstack/tree/psycopg) and Live at [streamlit-postgres.gerardbentley.com](https://streamlit-postgres.gerardbentley.com)
 
+## Run Streamlit + Go + Postgres + Nginx Version
+
+For when that SQLite database crumbles and Backend needs get complex.
+
+```sh
+curl https://github.com/gerardrbentley/streamlit-fullstack/archive/refs/heads/go.zip -O -L
+unzip go
+cd streamlit-fullstack-go
+cp example.env .env.dev
+# Production: Fill out .env with real credentials, docker compose should shut off streamlit ports
+cp streamlit_app/.streamlit/config.example.toml streamlit_app/.streamlit/config.toml
+# Production: random cookie secret
+# python -c "from pathlib import Path; from string import ascii_lowercase, digits; from random import choice; Path('streamlit_app/.streamlit/config.toml').write_text(Path('streamlit_app/.streamlit/config.example.toml').read_text().replace('changemecookiesecret', ''.join([choice(ascii_lowercase + digits) for _ in range(64)])))"
+docker-compose up
+# Will take some time to download all layers and dependencies
+```
+
+*NOTE:* Any changes to Go server require a new build of that container and restart. (or just kill the compose stack and `up --build` for the lazy)
+
+Go backend server relies on [go-chi](https://go-chi.io/#/) as the routing layer.
+
+Database connection relies on [lib/pq](https://github.com/lib/pq) to communicate with postgres.
+
 ## Run Streamlit + Postgres + Nginx Version
 
 Ran with `Docker version 20.10.12`, `Docker Compose version v2.2.3`:
