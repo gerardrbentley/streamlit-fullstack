@@ -1,3 +1,4 @@
+httpx==0.22.0
 psycopg==3.0.8
 pydantic==1.9.0
 streamlit==1.5.1

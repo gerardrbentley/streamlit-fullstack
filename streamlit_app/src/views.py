@@ -54,11 +54,10 @@ def render_create(connection: sqlite3.Connection) -> None:
 def render_read(connection: sqlite3.Connection) -> None:
     """Show all of the notes in the database in a feed"""
     st.success("Reading Note Feed")
-    notes = NoteService.list_all_notes(connection)
+    notes = NoteService.notes_from_api()
     with st.expander("Raw Note Table Data"):
         st.table(notes)
 
-    notes = [note for note in notes]
     for note in notes:
         render_note(note)
 

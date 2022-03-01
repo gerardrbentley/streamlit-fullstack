@@ -4,6 +4,7 @@ from typing import List, Optional, Type
 import os
 import typing
 
+import httpx
 import psycopg
 from psycopg.rows import class_row
 from pydantic import BaseSettings
@@ -122,6 +123,12 @@ def execute_query(
 
 class NoteService:
     """Namespace for Database Related Note Operations"""
+
+    def notes_from_api() -> List[Note]:
+        data = httpx.get("http://backend:3000/notes")
+        json_notes = data.json()
+        notes = [Note(**note) for note in json_notes['notes']]
+        return notes
 
     def list_all_notes(
         connection: psycopg.Connection,
