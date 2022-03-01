@@ -1,8 +1,5 @@
 from dataclasses import asdict
-import dataclasses
 from typing import List, Optional, Type
-import os
-import typing
 
 import httpx
 import psycopg
@@ -139,11 +136,9 @@ class NoteService:
         note_rows = fetch_rows(connection, read_notes_query, dclass=Note)
         return note_rows
 
-    def create_note(connection: psycopg.Connection, note: BaseNote) -> None:
+    def create_note(note: BaseNote) -> None:
         """Create a Note in the database"""
-        create_note_query = f"""INSERT into notes(created_timestamp, updated_timestamp, username, body)
-    VALUES(%(created_timestamp)s, %(updated_timestamp)s, %(username)s, %(body)s);"""
-        execute_query(connection, create_note_query, asdict(note))
+        httpx.post("http://backend:3000/notes", json=asdict(note))
 
     def update_note(connection: psycopg.Connection, note: Note) -> None:
         """Replace a Note in the database"""

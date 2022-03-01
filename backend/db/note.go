@@ -2,6 +2,7 @@ package db
 
 import (
 	"fullstack/backend/models"
+	"log"
 )
 
 func (db Database) GetAllNotes() (*models.NoteList, error) {
@@ -23,4 +24,19 @@ func (db Database) GetAllNotes() (*models.NoteList, error) {
 	}
 
 	return list, nil
+}
+
+func (db Database) AddNote(note *models.Note) error {
+	var id int
+	// timestamp := now.Unix()
+	query := `INSERT into notes(username, body, created_timestamp, updated_timestamp)
+    VALUES($1, $2, $3, $4) RETURNING rowid;`
+	rows := db.Connection.QueryRow(query, note.Username, note.Body, note.CreatedTimestamp, note.UpdatedTimestamp)
+	err := rows.Scan(&id)
+	if err != nil {
+		return err
+	}
+	note.Rowid = id
+	log.Printf("%+v\n", note)
+	return nil
 }

@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"fmt"
+	"fullstack/backend/models"
 	"log"
 	"net/http"
 	"strconv"
@@ -19,6 +20,13 @@ var noteIDKey = NoteKey{key: "note-key"}
 
 func notes(router chi.Router) {
 	router.Get("/", getAllNotes)
+	router.Post("/", createNote)
+	router.Route("/{itemId}", func(router chi.Router) {
+		router.Use(NoteContext)
+		// router.Get("/", getNote)
+		// router.Put("/", updateNote)
+		// router.Delete("/", deleteItem)
+	})
 }
 
 func NoteContext(next http.Handler) http.Handler {
@@ -35,6 +43,22 @@ func NoteContext(next http.Handler) http.Handler {
 		ctx := context.WithValue(r.Context(), noteIDKey, id)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func createNote(w http.ResponseWriter, r *http.Request) {
+	note := &models.Note{}
+	if err := render.Bind(r, note); err != nil {
+		render.Render(w, r, ErrBadRequest)
+		return
+	}
+	if err := dbInstance.AddNote(note); err != nil {
+		render.Render(w, r, ErrorRenderer(err))
+		return
+	}
+	if err := render.Render(w, r, note); err != nil {
+		render.Render(w, r, ServerErrorRenderer(err))
+		return
+	}
 }
 
 func getAllNotes(w http.ResponseWriter, r *http.Request) {

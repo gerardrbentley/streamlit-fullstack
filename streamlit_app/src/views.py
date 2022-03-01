@@ -17,16 +17,16 @@ def render_note(note: Note) -> None:
     st.write(note.body)
 
 
-def do_create(connection: sqlite3.Connection, note: BaseNote) -> None:
+def do_create(note: BaseNote) -> None:
     """Streamlit callback for creating a note and showing confirmation"""
     st.warning("Creating your Note")
-    NoteService.create_note(connection, note)
+    NoteService.create_note(note)
     st.success(
         f"Successfully Created your Note! Check the Read Note Feed page to see it"
     )
 
 
-def render_create(connection: sqlite3.Connection) -> None:
+def render_create() -> None:
     """Show the form for creating a new Note"""
     with st.form("create_form", clear_on_submit=False):
         st.write("Enter a Username and Note")
@@ -48,10 +48,10 @@ def render_create(connection: sqlite3.Connection) -> None:
             "Submit", help="Create your Note! (You'll get a confirmation below)"
         )
         if submitted:
-            do_create(connection, new_note)
+            do_create(new_note)
 
 
-def render_read(connection: sqlite3.Connection) -> None:
+def render_read() -> None:
     """Show all of the notes in the database in a feed"""
     st.success("Reading Note Feed")
     notes = NoteService.notes_from_api()

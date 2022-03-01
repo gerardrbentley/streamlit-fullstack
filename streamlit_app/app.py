@@ -39,7 +39,10 @@ def render_sidebar(connection: psycopg.Connection) -> None:
     """Provides Selectbox Drop Down for which view to render"""
     choice = st.sidebar.radio("Go To Page:", PAGES.keys())
     render_func = PAGES.get(choice)
-    render_func(connection)
+    if choice in ("Read Note Feed", "Create a Note"):
+        render_func()
+    else:
+        render_func(connection)
 
 
 @st.cache(hash_funcs={psycopg.Connection: id}, suppress_st_warning=True)
