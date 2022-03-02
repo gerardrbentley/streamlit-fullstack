@@ -1,6 +1,7 @@
 from time import time
 import psycopg
-import os
+import logging
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 import streamlit as st
 
@@ -32,17 +33,15 @@ def main() -> None:
     init_db(connection)
 
     st.header(f"The Littlest Fullstack App + Postgres :elephant:!")
-    render_sidebar(connection)
+    render_sidebar()
 
 
-def render_sidebar(connection: psycopg.Connection) -> None:
+def render_sidebar() -> None:
     """Provides Selectbox Drop Down for which view to render"""
     choice = st.sidebar.radio("Go To Page:", PAGES.keys())
     render_func = PAGES.get(choice)
-    if choice in ("Read Note Feed", "Create a Note"):
-        render_func()
-    else:
-        render_func(connection)
+    render_func()
+
 
 
 @st.cache(hash_funcs={psycopg.Connection: id}, suppress_st_warning=True)

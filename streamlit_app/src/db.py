@@ -1,5 +1,6 @@
 from dataclasses import asdict
 from typing import List, Optional, Type
+import logging
 
 import httpx
 import psycopg
@@ -121,31 +122,25 @@ def execute_query(
 class NoteService:
     """Namespace for Database Related Note Operations"""
 
-    def notes_from_api() -> List[Note]:
-        data = httpx.get("http://backend:3000/notes")
-        json_notes = data.json()
+    def list_all_notes() -> List[Note]:
+        response = httpx.get("http://backend:3000/notes")
+        logging.info(response)
+        json_notes = response.json()
         notes = [Note(**note) for note in json_notes['notes']]
         return notes
 
-    def list_all_notes(
-        connection: psycopg.Connection,
-    ) -> List[Note]:
-        """Returns rows from all notes. Ordered in reverse creation order"""
-        read_notes_query = f"""SELECT rowid, created_timestamp, updated_timestamp, username, body
-        FROM notes ORDER BY rowid DESC;"""
-        note_rows = fetch_rows(connection, read_notes_query, dclass=Note)
-        return note_rows
-
     def create_note(note: BaseNote) -> None:
         """Create a Note in the database"""
-        httpx.post("http://backend:3000/notes", json=asdict(note))
+        response = httpx.post("http://backend:3000/notes", json=asdict(note))
+        return response
 
-    def update_note(connection: psycopg.Connection, note: Note) -> None:
+    def update_note(note: Note) -> None:
         """Replace a Note in the database"""
-        update_note_query = f"""UPDATE notes SET updated_timestamp=%(updated_timestamp)s, username=%(username)s, body=%(body)s WHERE rowid=%(rowid)s;"""
-        execute_query(connection, update_note_query, asdict(note))
+        response = httpx.put(f"http://backend:3000/notes/{note.rowid}", json=asdict(note))
+        return response
 
-    def delete_note(connection: psycopg.Connection, note: Note) -> None:
+    def delete_note(note: Note) -> None:
         """Delete a Note in the database"""
-        delete_note_query = f"""DELETE from notes WHERE rowid = %(rowid)s;"""
-        execute_query(connection, delete_note_query, {"rowid": note.rowid})
+        # DELETE spec doesn't include json body: https://github.com/encode/httpx/discussions/1587
+        response = httpx.request(method="delete", url=f"http://backend:3000/notes/{note.rowid}", json=asdict(note))
+        return response

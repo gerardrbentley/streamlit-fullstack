@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/render"
 )
 
@@ -15,6 +16,7 @@ func NewHandler(db db.Database) http.Handler {
 	dbInstance = db
 	router.MethodNotAllowed(methodNotAllowedHandler)
 	router.NotFound(notFoundHandler)
+	router.Use(middleware.Logger)
 	router.Route("/notes", notes)
 	return router
 }

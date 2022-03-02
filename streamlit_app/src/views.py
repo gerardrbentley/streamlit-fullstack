@@ -54,7 +54,7 @@ def render_create() -> None:
 def render_read() -> None:
     """Show all of the notes in the database in a feed"""
     st.success("Reading Note Feed")
-    notes = NoteService.notes_from_api()
+    notes = NoteService.list_all_notes()
     with st.expander("Raw Note Table Data"):
         st.table(notes)
 
@@ -62,17 +62,17 @@ def render_read() -> None:
         render_note(note)
 
 
-def do_update(connection: sqlite3.Connection, new_note: Note) -> None:
+def do_update(new_note: Note) -> None:
     """Streamlit callback for updating a note and showing confirmation"""
     st.warning(f"Updating Note #{new_note.rowid}")
-    NoteService.update_note(connection, new_note)
+    NoteService.update_note(new_note)
     st.success(f"Updated Note #{new_note.rowid}, go to the Read Notes Feed to see it!")
 
 
-def render_update(connection: sqlite3.Connection) -> None:
+def render_update() -> None:
     """Show the form for updating an existing Note"""
     st.success("Reading Notes")
-    notes = NoteService.list_all_notes(connection)
+    notes = NoteService.list_all_notes()
     note_map = {note.rowid: note for note in notes}
     note_id = st.selectbox(
         "Which Note to Update?",
@@ -111,20 +111,20 @@ def render_update(connection: sqlite3.Connection) -> None:
                 body,
                 note_to_update.rowid,
             )
-            do_update(connection, new_note)
+            do_update(new_note)
 
 
-def do_delete(connection: sqlite3.Connection, note_to_delete: Note) -> None:
+def do_delete(note_to_delete: Note) -> None:
     """Streamlit callback for deleting a note and showing confirmation"""
     st.warning(f"Deleting Note #{note_to_delete.rowid}")
-    NoteService.delete_note(connection, note_to_delete)
+    NoteService.delete_note(note_to_delete)
     st.success(f"Deleted Note #{note_to_delete.rowid}")
 
 
-def render_delete(connection: sqlite3.Connection) -> None:
+def render_delete() -> None:
     """Show the form for deleting an existing Note"""
     st.success("Reading Notes")
-    notes = NoteService.list_all_notes(connection)
+    notes = NoteService.list_all_notes()
     note_map = {note.rowid: note for note in notes}
     note_id = st.selectbox("Which Note to Delete?", note_map.keys())
     note_to_delete = note_map[note_id]
@@ -135,7 +135,7 @@ def render_delete(connection: sqlite3.Connection) -> None:
         "Delete Note (This Can't Be Undone!)",
         help="I hope you know what you're getting into!",
         on_click=do_delete,
-        args=(connection, note_to_delete),
+        args=(note_to_delete,),
     )
 
 
