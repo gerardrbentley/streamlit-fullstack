@@ -9,6 +9,7 @@ services:
     depends_on:
       - streamlit-app
       - db
+      - backend
 
   streamlit-app:
     ports:
@@ -21,7 +22,7 @@ services:
       - ./.env.dev
     restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
     depends_on:
-      - db
+      - backend
 
   backend:
     ports:
@@ -31,16 +32,18 @@ services:
       - ./.env.dev
     depends_on:
       - db
+    restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
 
   db:
     image: postgres:14
+    build: ./postgres
+    command: ["postgres", "-c", "log_statement=all", "-c", "log_destination=stderr"]
     volumes:
       - postgres_data:/var/lib/postgresql/data/pgdata
     env_file:
-      - .env.dev
+      - ./.env.dev
     environment:
       PGDATA: /var/lib/postgresql/data/pgdata/
-    restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
 
 volumes:
   postgres_data:

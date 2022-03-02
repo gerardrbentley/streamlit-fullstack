@@ -32,6 +32,7 @@ func ErrorRenderer(err error) *ErrorResponse {
 		Message:    err.Error(),
 	}
 }
+
 func ServerErrorRenderer(err error) *ErrorResponse {
 	return &ErrorResponse{
 		Err:        err,

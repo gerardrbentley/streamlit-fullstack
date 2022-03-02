@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 )
@@ -20,12 +21,19 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error occurred: %v", err)
 	}
-	pgUser, pgPassword, pgDB :=
-		os.Getenv("POSTGRES_USER"),
-		os.Getenv("POSTGRES_PASSWORD"),
-		os.Getenv("POSTGRES_DB")
+	port, err := strconv.Atoi(os.Getenv("POSTGRES_PORT"))
+	if err != nil {
+		log.Fatal("Port non-integer ", err)
+	}
+	pg := db.PGConnection{
+		User:     os.Getenv("POSTGRES_USER"),
+		Password: os.Getenv("POSTGRES_PASSWORD"),
+		DbName:   os.Getenv("POSTGRES_DB"),
+		Port:     port,
+		Host:     os.Getenv("POSTGRES_HOST"),
+	}
 
-	database, err := db.Initialize(pgUser, pgPassword, pgDB)
+	database, err := db.Initialize(pg)
 	if err != nil {
 		log.Fatalf("Could not set up database %v", err)
 	}

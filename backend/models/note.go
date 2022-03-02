@@ -6,11 +6,11 @@ import (
 )
 
 type Note struct {
-	Rowid            int    `json:"rowid"`
-	Username         string `json:"username"`
-	Body             string `json:"body"`
-	CreatedTimestamp int    `json:"created_timestamp"`
-	UpdatedTimestamp int    `json:"updated_timestamp"`
+	Rowid            int     `json:"rowid"`
+	Username         string  `json:"username"`
+	Body             string  `json:"body"`
+	CreatedTimestamp float32 `json:"created_timestamp"`
+	UpdatedTimestamp float32 `json:"updated_timestamp"`
 }
 
 type NoteList struct {

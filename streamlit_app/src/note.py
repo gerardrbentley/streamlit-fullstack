@@ -1,16 +1,3 @@
-from dataclasses import asdict
-from typing import List
-import logging
-
-import httpx
-
-from src.data import Note
-from src.data import Note, BaseNote
-
-
-CHAR_LIMIT = 140
-
-
 class NoteService:
     """Namespace for Database Related Note Operations"""
 

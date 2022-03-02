@@ -1,6 +1,3 @@
-from pathlib import Path
-import sqlite3
-
 import streamlit as st
 
 from src.formatting import display_timestamp, utc_timestamp

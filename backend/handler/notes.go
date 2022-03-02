@@ -80,7 +80,7 @@ func getNote(w http.ResponseWriter, r *http.Request) {
 	noteId := r.Context().Value(noteIdKey).(int)
 	note, err := dbInstance.GetNoteById(noteId)
 	if err != nil {
-		if err == db.ErrNoMatch {
+		if err == db.ErrRowNotFound {
 			render.Render(w, r, ErrNotFound)
 		} else {
 			render.Render(w, r, ErrorRenderer(err))
@@ -97,7 +97,7 @@ func deleteNote(w http.ResponseWriter, r *http.Request) {
 	noteId := r.Context().Value(noteIdKey).(int)
 	err := dbInstance.DeleteNote(noteId)
 	if err != nil {
-		if err == db.ErrNoMatch {
+		if err == db.ErrRowNotFound {
 			render.Render(w, r, ErrNotFound)
 		} else {
 			render.Render(w, r, ServerErrorRenderer(err))
@@ -116,7 +116,7 @@ func updateNote(w http.ResponseWriter, r *http.Request) {
 	}
 	item, err := dbInstance.UpdateNote(noteId, noteData)
 	if err != nil {
-		if err == db.ErrNoMatch {
+		if err == db.ErrRowNotFound {
 			render.Render(w, r, ErrNotFound)
 		} else {
 			render.Render(w, r, ServerErrorRenderer(err))
