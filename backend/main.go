@@ -16,7 +16,7 @@ import (
 )
 
 func main() {
-	addr := ":3000"
+	addr := ":" + os.Getenv("BACKEND_PORT")
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatalf("Error occurred: %v", err)

@@ -1,8 +1,8 @@
 import streamlit as st
 
 from src.formatting import display_timestamp, utc_timestamp
-from src.data import Note, BaseNote
-from src.db import NoteService, CHAR_LIMIT
+from src.models import Note, BaseNote
+from src.services import NoteService, CHAR_LIMIT
 
 
 def render_note(note: Note) -> None:
@@ -150,4 +150,4 @@ Next steps were upgrading the data store to Postgres :elephant:.
 
 Then an NGINX webserver + Docker containerization layer to serve it all up!
 
-Finally a backend API layer with FastAPI :lightning:!""")
+Finally a backend REST API layer with Go!""")

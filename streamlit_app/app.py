@@ -15,7 +15,7 @@ PAGES = {
 
 def main() -> None:
     """Main Streamlit App Entry"""
-    st.header(f"The Littlest Fullstack App + Postgres :elephant:!")
+    st.header(f"The Littlest Fullstack App + Postgres + Go!")
     render_sidebar()
 
 

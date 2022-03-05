@@ -1,7 +1,5 @@
 services:
   nginx-proxy:
-    container_name: nginx-proxy
-    hostname: nginx-proxy
     restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
     build: ./nginx
     ports:
