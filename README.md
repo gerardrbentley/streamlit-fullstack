@@ -12,7 +12,7 @@ Run a single Streamlit server with SQLite Database, a Streamlit + Postgres + Ngi
 
 - :mouse: littlest (original) version wil remain on [branch `littlest`](https://github.com/gerardrbentley/streamlit-fullstack/tree/littlest)
 - :elephant: Postgres (`psycopg3`) + Nginx + Docker-Compose version at [branch `psycopg`](https://github.com/gerardrbentley/streamlit-fullstack/tree/psycopg) and Live at [streamlit-postgres.gerardbentley.com](https://streamlit-postgres.gerardbentley.com)
-- Go REST API + Postgres + Nginx + Docker-Compose version at [branc `go`](https://github.com/gerardrbentley/streamlit-fullstack/tree/go)
+- Go REST API + Postgres + Nginx + Docker-Compose version at [branch `go`](https://github.com/gerardrbentley/streamlit-fullstack/tree/go)
 
 ## Run Streamlit + Go + Postgres + Nginx Version
 
