@@ -68,7 +68,7 @@ func (db Database) AddNote(note *models.Note) error {
 func (db Database) UpdateNote(noteId int, noteData models.Note) (models.Note, error) {
 	note := models.Note{}
 	query := `UPDATE note SET username=$1, body=$2 WHERE rowid=$3 
-		RETURNING rowid, username, body, created_timestamp, updated_timestamp;`
+		RETURNING rowid, username, body, date_part('epoch', created_timestamp), date_part('epoch', updated_timestamp);`
 	log.Println("Updating Note with ID ", noteId, ". Setting Fields ", noteData)
 	row := db.Connection.QueryRow(query, noteData.Username, noteData.Body, noteId)
 	err := row.Scan(&note.Rowid, &note.Username, &note.Body, &note.CreatedTimestamp, &note.UpdatedTimestamp)
